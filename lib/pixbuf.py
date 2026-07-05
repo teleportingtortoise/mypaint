@@ -20,8 +20,6 @@ which are exposed on POSIX platforms.
 
 ## Imports
 
-from __future__ import division, print_function
-
 from lib.gibindings import GdkPixbuf
 
 import lib.fileutils
@@ -42,13 +40,13 @@ LOAD_CHUNK_SIZE = 64 * 1024
 ## Utility functions
 
 
-def save(pixbuf, filename, type='png', **kwargs):
+def save(pixbuf, filename, type="png", **kwargs):
     """Save pixbuf to a named file (compatibility wrapper)
 
     :param GdkPixbuf.Pixbuf pixbuf: the pixbuf to save
     :param unicode filename: file path to save as
     :param str type: type to save as: 'jpeg'/'png'/...
-    :param \*\*kwargs: passed through to GdkPixbuf
+    :param **kwargs: passed through to GdkPixbuf
     :rtype: bool
     :returns: whether the file was saved fully
 
@@ -61,7 +59,7 @@ def save(pixbuf, filename, type='png', **kwargs):
     >>> shutil.rmtree(d, ignore_errors=True)
 
     """
-    with open(filename, 'wb') as fp:
+    with open(filename, "wb") as fp:
         try:
             save_to_callbackv = pixbuf.save_to_callbackv
         except AttributeError:
@@ -109,7 +107,7 @@ def load_from_file(filename, progress=None, image_type=None):
     if not progress:
         progress = lib.feedback.Progress()
 
-    with open(filename, 'rb') as fp:
+    with open(filename, "rb") as fp:
         st_buf = os.stat(filename)
         size = st_buf.st_size
         progress.items = size
@@ -183,16 +181,19 @@ def load_from_zipfile(datazip, filename, progress=None, image_type=None):
         raise ValueError("progress argument must be unsized")
 
     try:
-        datafp = datazip.open(filename, mode='r')
+        datafp = datazip.open(filename, mode="r")
         info = datazip.getinfo(filename)
     except KeyError:
         # Support for bad zip files (saved by old versions of the
         # GIMP ORA plugin)
-        filename_enc = filename.encode('utf-8')
-        datafp = datazip.open(filename_enc, mode='r')
-        logger.warning('Bad ZIP file. There is an utf-8 encoded '
-                       'filename that does not have the utf-8 '
-                       'flag set: %r', filename)
+        filename_enc = filename.encode("utf-8")
+        datafp = datazip.open(filename_enc, mode="r")
+        logger.warning(
+            "Bad ZIP file. There is an utf-8 encoded "
+            "filename that does not have the utf-8 "
+            "flag set: %r",
+            filename,
+        )
         info = datazip.getinfo(filename_enc)
 
     progress.items = info.file_size
@@ -204,12 +205,14 @@ def load_from_zipfile(datazip, filename, progress=None, image_type=None):
 
 ## Module testing
 
+
 def _test():
     """Run doctest strings"""
     import doctest
+
     doctest.testmod(optionflags=doctest.ELLIPSIS)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     _test()
