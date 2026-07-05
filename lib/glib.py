@@ -19,7 +19,6 @@ unicode, and may not even be UTF-8). This module works around that.
 
 ## Imports
 
-from __future__ import division, print_function
 import logging
 import sys
 
@@ -32,6 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 ## File path getter functions
+
 
 def filename_to_unicode(opsysstring):
     """Converts a str representing a filename from GLib to unicode.
@@ -94,8 +94,7 @@ def filename_to_unicode(opsysstring):
     if ustring is None:
         for s in [opsysstring, opsysstring_degenerate_unicode]:
             try:
-                ustring, _bytes_read, _bytes_written \
-                    = GLib.filename_to_utf8(s, -1)
+                ustring, _bytes_read, _bytes_written = GLib.filename_to_utf8(s, -1)
                 break
             except TypeError:
                 pass
@@ -167,6 +166,7 @@ def get_user_special_dir(d_id):
 
 ## First-import cache forcing
 
+
 def init_user_dir_caches():
     """Caches the GLib user directories
 
@@ -188,9 +188,16 @@ def init_user_dir_caches():
     # It doesn't matter if some of these are None
     for i in range(GLib.UserDirectory.N_DIRECTORIES):
         k = GLib.UserDirectory(i)
+
+        try:
+            dir_kind = k.name
+        except AttributeError:
+            # Compatibility with PyGObject < 3.51
+            dir_kind = k.value_name
+
         logger.debug(
             "Init g_get_user_special_dir(%s): %r",
-            k.value_name,
+            dir_kind,
             get_user_special_dir(k),
         )
 
@@ -261,16 +268,18 @@ def filename_from_uri(uri):
         # And that windows _utf8 mess still uses it too.
         abspath = g_filename_from_uri(uri, "")
         hostname = None
-    assert (not hostname), ("Only URIs without hostnames are supported.")
+    assert not hostname, "Only URIs without hostnames are supported."
     return (filename_to_unicode(abspath), None)
 
 
 ## Module testing
 
+
 def _test():
     import doctest
+
     doctest.testmod()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     _test()

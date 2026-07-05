@@ -9,8 +9,6 @@
 """Modes for moving layers around on the canvas"""
 
 ## Imports
-from __future__ import division, print_function
-
 from gettext import gettext as _
 
 from lib.gibindings import Gdk
@@ -24,8 +22,7 @@ import gui.cursor
 ## Class defs
 
 
-class LayerMoveMode (gui.mode.ScrollableModeMixin,
-                     gui.mode.DragMode):
+class LayerMoveMode(gui.mode.ScrollableModeMixin, gui.mode.DragMode):
     """Moving a layer interactively
 
     MyPaint is tile-based, and tiles must align between layers.
@@ -37,17 +34,17 @@ class LayerMoveMode (gui.mode.ScrollableModeMixin,
 
     ## API properties and informational methods
 
-    ACTION_NAME = 'LayerMoveMode'
+    ACTION_NAME = "LayerMoveMode"
 
     pointer_behavior = gui.mode.Behavior.CHANGE_VIEW
     scroll_behavior = gui.mode.Behavior.CHANGE_VIEW
 
     @classmethod
     def get_name(cls):
-        return _(u"Move Layer")
+        return _("Move Layer")
 
     def get_usage(self):
-        return _(u"Move the current layer")
+        return _("Move the current layer")
 
     @property
     def active_cursor(self):
@@ -69,11 +66,14 @@ class LayerMoveMode (gui.mode.ScrollableModeMixin,
             cursor_name,
         )
 
-    permitted_switch_actions = set([
-        'RotateViewMode',
-        'ZoomViewMode',
-        'PanViewMode',
-    ] + gui.mode.BUTTON_BINDING_ACTIONS)
+    permitted_switch_actions = set(
+        [
+            "RotateViewMode",
+            "ZoomViewMode",
+            "PanViewMode",
+        ]
+        + gui.mode.BUTTON_BINDING_ACTIONS
+    )
 
     ## Initialization
 
@@ -135,8 +135,7 @@ class LayerMoveMode (gui.mode.ScrollableModeMixin,
             if self._drag_update_idler_srcid is None:
                 idler = self._drag_update_idler
                 self._drag_update_idler_srcid = GLib.idle_add(idler)
-        return super(LayerMoveMode, self).drag_update_cb(
-            tdw, event, ev_x, ev_y, dx, dy)
+        return super(LayerMoveMode, self).drag_update_cb(tdw, event, ev_x, ev_y, dx, dy)
 
     def _drag_update_idler(self):
         """Processes tile moves in chunks as a background idler"""
@@ -165,8 +164,7 @@ class LayerMoveMode (gui.mode.ScrollableModeMixin,
             tdw.set_sensitive(False)
 
             window = tdw.get_window()
-            cursor = Gdk.Cursor.new_for_display(
-                window.get_display(), Gdk.CursorType.WATCH)
+            cursor = Gdk.Cursor.new_from_name(window.get_display(), "wait")
             tdw.set_override_cursor(cursor)
 
             self.final_modifiers = self.current_modifiers()

@@ -8,8 +8,6 @@
 
 """Custom GtkScale/GtkSpinButton combination widget."""
 
-from __future__ import division, print_function
-
 import weakref
 
 from lib.gibindings import Gtk
@@ -25,6 +23,22 @@ from lib.observable import event
 _DOUBLE_CLICK = getattr(Gdk.EventType, "2BUTTON_PRESS")
 
 
+def _prop_name(prop: GObject.ParamSpec) -> str:
+    try:
+        return prop.get_name()
+    except AttributeError:
+        # Compatibility with PyGObject < 3.51
+        return prop.name
+
+
+def _prop_default_value(prop: GObject.ParamSpec) -> GObject.Value:
+    try:
+        return prop.get_default_value()
+    except AttributeError:
+        # Compatibility with PyGObject < 3.51
+        return prop.default_value
+
+
 class ScaleDelegator(type(Gtk.Bin)):
     """Metaclass automatically copying properties from Gtk.Scale
 
@@ -35,23 +49,26 @@ class ScaleDelegator(type(Gtk.Bin)):
 
     def __init__(cls, name, bases, dict):
         # Existing properties from shared ancestry
-        base = {p.name for p in Gtk.Bin.list_properties()}
+        base = {_prop_name(p) for p in Gtk.Bin.list_properties()}
         # Properties in GtkScale, but not GtkBin
-        to_add = [p for p in Gtk.Scale.list_properties() if p.name not in base]
+        to_add = [p for p in Gtk.Scale.list_properties() if _prop_name(p) not in base]
         for prop in to_add:
             val_type = prop.value_type
             setattr(
-                cls, prop.name.replace('-', '_'), GObject.Property(
-                type=val_type.pytype if val_type.pytype else val_type,
-                default=prop.default_value)
+                cls,
+                _prop_name(prop).replace("-", "_"),
+                GObject.Property(
+                    type=val_type.pytype if val_type.pytype else val_type,
+                    default=_prop_default_value(prop),
+                ),
             )
         # Store newly created property names to determine which to delegate
-        cls._scale_props = {p.name for p in to_add}
+        cls._scale_props = {_prop_name(p) for p in to_add}
         super(ScaleDelegator, cls).__init__(name, bases, dict)
 
 
-class InputSlider (with_metaclass(ScaleDelegator, Gtk.Bin)):
-    """ Custom container widget switching between slider and spinner box
+class InputSlider(with_metaclass(ScaleDelegator, Gtk.Bin)):
+    """Custom container widget switching between slider and spinner box
 
     This widget is a container with a single child - normally a slider, but
     which can be toggled to a spin button to allow manual adjustment of the
@@ -74,7 +91,7 @@ class InputSlider (with_metaclass(ScaleDelegator, Gtk.Bin)):
     """
 
     # Needed for instantiation via glade/xml
-    __gtype_name__ = 'InputSlider'
+    __gtype_name__ = "InputSlider"
 
     # If the scale/slider does not define a limit on precision, this
     # value is used instead.
@@ -84,7 +101,7 @@ class InputSlider (with_metaclass(ScaleDelegator, Gtk.Bin)):
 
     def _notify(self, _, prop):
         """Delegate property changes to the scale instance"""
-        name = prop.name
+        name = _prop_name(prop)
         if name in self._scale_props:
             self._scale.set_property(name, self.get_property(name))
 
@@ -190,7 +207,8 @@ class InputSlider (with_metaclass(ScaleDelegator, Gtk.Bin)):
         spin_button.connect("key-press-event", self._spin_button_key_event)
         spin_button.connect("key-release-event", self._spin_button_key_event)
         self._focus_cb_id = spin_button.connect(
-            "focus-out-event", self._spin_button_focus_out)
+            "focus-out-event", self._spin_button_focus_out
+        )
         self.spin_button_created(scale, weakref.ref(spin_button))
         return spin_button
 
@@ -206,7 +224,7 @@ class InputSlider (with_metaclass(ScaleDelegator, Gtk.Bin)):
         self._swap_back()
 
     def _spin_button_key_event(self, spinbut, event):
-        """ Switch back on return/enter/escape - reset old value on escape """
+        """Switch back on return/enter/escape - reset old value on escape"""
         if event.keyval in {Gdk.KEY_Return, Gdk.KEY_KP_Enter}:
             self._swap_back()
             return True

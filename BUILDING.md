@@ -10,6 +10,7 @@ a stable version of MyPaint.
 * [Install third-party dependencies](#install-third-party-dependencies)
   - [Debian and derivatives](#debian-and-derivatives)
   - [Red Hat and derivatives](#red-hat-and-derivatives)
+  - [OpenSUSE](#opensuse)
   - [Windows MSYS2](#windows-msys2)
   - [OSX MacPorts](#osx-macports)
  * [Fetch the source](#fetch-the-source)
@@ -80,7 +81,7 @@ installed before you can build it.
 - setuptools
 - pygobject
 - gtk3 (>= 3.12)
-- python (>= 2.7.4)
+- python (>= 3.8)
 - swig (>= 3)
 - numpy
 - librsvg2 (and its svg gdk-pixbuf loader)
@@ -126,6 +127,20 @@ on a minimal CentOS 7.3 install, and Fedora 30.
 
     # For python 3
     sudo yum install -y python3-setuptools python3-devel python3-numpy
+
+### OpenSUSE
+
+Issue  the following commands to install the external dependencies.
+
+    sudo zypper install \
+    git swig gcc-c++ gobject-introspection gtk3-devel \
+    libpng16-devel liblcms2-devel libjson-c-devel \
+    librsvg-2-2 gettext-tools
+
+    # For python3
+    sudo zypper install \
+    python311-setuptools python311-devel python311-numpy-devel \
+    python311-pycairo python311-gobject-devel \
 
 ### Windows MSYS2
 
@@ -233,13 +248,13 @@ between runs when you do this.
 
 Please run the doctests before committing new code.
 
-    sudo apt-get install python-nose
-    python setup.py nosetests
+    sudo apt-get install python3-pytest
+    pytest --doctest-modules lib
 
 We have some heavier conformance tests for the C++ parts too. These take
 longer to run.
 
-    python setup.py test
+    pytest -rP
 
 You should write doctests for important new Python code. Please consider
 writing tests in the `tests` folder too, if you make any changes to the

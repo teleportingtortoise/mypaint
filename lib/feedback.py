@@ -11,15 +11,14 @@
 
 # Imports:
 
-from __future__ import division, print_function
-
 from lib.observable import event
 import lib.helpers
 
 
 # Class defs:
 
-class Progress (object):
+
+class Progress(object):
     """Itemized progress report with hierarchy.
 
     A top-level GUI process can create one of these objects, and connect
@@ -305,8 +304,9 @@ class Progress (object):
 def _test():
     """Run doctests"""
     import doctest
+
     doctest.testmod()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     _test()
